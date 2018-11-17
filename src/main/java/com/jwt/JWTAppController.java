@@ -7,17 +7,18 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 
 @RestController
 @ConfigurationProperties(prefix = "app")
-public class GenerateJWT {
+public class JWTAppController {
 	
 	private String secret;
 	private String issuer;
@@ -39,15 +40,15 @@ public class GenerateJWT {
 	}
 	
     @RequestMapping("/")
-    public ModelAndView displayArticle(Map<String, Object> model) {
+    public ModelAndView index(Map<String, Object> model, @RequestParam(required = false, name = "message") String message) {
 
-        model.put("title", "hello");
+        model.put("message", message);
 
         return new ModelAndView("index", model);
     }
 	
 	@RequestMapping("/generateToken")
-	public ModelAndView generateToken(Map<String, Object> model, HttpServletResponse response) {
+	public void generateToken(Map<String, Object> model, HttpServletResponse response) {
 		try {
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.SECOND, 5);
@@ -57,17 +58,25 @@ public class GenerateJWT {
 		        .withExpiresAt(cal.getTime())
 		        .sign(algorithm);
 		    response.addCookie(new Cookie("token", token));
-		    model.put("title", token);
-		    return new ModelAndView("index", model);
-		} catch (JWTCreationException exception){
+		    response.sendRedirect("/ajax/page1");
+		   // return new ModelAndView("index", model);
+		} catch (Exception exception){
 			exception.printStackTrace();
-			return null;
 		}
 	}
 	
-	@RequestMapping("/ajax/validateToken")
-	public String validateToken() {
-		return "token is valid";
+	@RequestMapping("/ajax/page1")
+	public ModelAndView page1(Map<String, Object> model, @CookieValue("token") String token) {
+		model.put("token", token);
+		model.put("expiresAt", JWT.decode(token).getExpiresAt());	
+		return new ModelAndView("page1", model);
+	}
+	
+	@RequestMapping("/ajax/page2")
+	public ModelAndView page2(Map<String, Object> model, @CookieValue("token") String token) {
+		model.put("token", token);
+		model.put("expiresAt", JWT.decode(token).getExpiresAt());		
+		return new ModelAndView("page2", model);
 	}
 
 }

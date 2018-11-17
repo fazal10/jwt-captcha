@@ -71,7 +71,7 @@ public class TokenFilter implements Filter {
 		if(isTokenValidBoolean){
 			chain.doFilter(request, response);
 		} else {
-			 ((HttpServletResponse) response).sendRedirect("/");
+			 ((HttpServletResponse) response).sendRedirect("/?message=token expired");
 		}
 
 	}

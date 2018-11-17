@@ -1,7 +1,8 @@
 <body>
-	<h1>{{title}}</h1>
-	<input type="button" value="Login"
+	<h1>Main Page</h1>
+	{{#message}}
+		<span style='color:red'>{{message}}</span><br><br>
+	{{/message}}
+	<input type="button" value="Login/Captcha Challenge"
 	 onclick="window.location.href='./generateToken'" />
-	 <input type="button" value="Validate"
-	 onclick="window.location.href='/ajax/validateToken'" />
 </body>
