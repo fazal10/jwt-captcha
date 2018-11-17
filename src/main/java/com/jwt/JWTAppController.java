@@ -22,7 +22,17 @@ public class JWTAppController {
 	
 	private String secret;
 	private String issuer;
+	private int tokenvalidity;
 	
+
+	public int getTokenvalidity() {
+		return tokenvalidity;
+	}
+
+	public void setTokenvalidity(int tokenvalidity) {
+		this.tokenvalidity = tokenvalidity;
+	}
+
 	public String getSecret() {
 		return secret;
 	}
@@ -51,7 +61,7 @@ public class JWTAppController {
 	public void generateToken(Map<String, Object> model, HttpServletResponse response) {
 		try {
 			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.SECOND, 5);
+			cal.add(Calendar.SECOND, this.tokenvalidity);
 		    Algorithm algorithm = Algorithm.HMAC256(this.secret);
 		    String token = JWT.create()
 		        .withIssuer(this.issuer)
@@ -59,7 +69,6 @@ public class JWTAppController {
 		        .sign(algorithm);
 		    response.addCookie(new Cookie("token", token));
 		    response.sendRedirect("/ajax/page1");
-		   // return new ModelAndView("index", model);
 		} catch (Exception exception){
 			exception.printStackTrace();
 		}
@@ -68,6 +77,7 @@ public class JWTAppController {
 	@RequestMapping("/ajax/page1")
 	public ModelAndView page1(Map<String, Object> model, @CookieValue("token") String token) {
 		model.put("token", token);
+		model.put("currentTime", Calendar.getInstance().getTime());
 		model.put("expiresAt", JWT.decode(token).getExpiresAt());	
 		return new ModelAndView("page1", model);
 	}
@@ -75,6 +85,7 @@ public class JWTAppController {
 	@RequestMapping("/ajax/page2")
 	public ModelAndView page2(Map<String, Object> model, @CookieValue("token") String token) {
 		model.put("token", token);
+		model.put("currentTime", Calendar.getInstance().getTime());
 		model.put("expiresAt", JWT.decode(token).getExpiresAt());		
 		return new ModelAndView("page2", model);
 	}
